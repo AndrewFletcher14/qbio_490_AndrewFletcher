@@ -1,0 +1,347 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+if (!require("knitr", quietly = TRUE))
+install.packages("knitr")
+if (!require("BiocManager", quietly = TRUE))
+install.packages("BiocManager")
+BiocManager::install(version = "3.23")
+if (!require("TCGAbiolinks", quietly = TRUE))
+BiocManager::install("TCGAbiolinks")
+if (!require("maftools", quietly = TRUE))
+BiocManager::install("maftools")
+library(BiocManager)
+library(TCGAbiolinks)
+library(maftools)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r setup}
+knitr::opts_knit$set(root.dir = normalizePath("/home1/aafletch/490_cluster/analysis_data/"))
+```
+
+```{r}
+clin_query <- GDCquery(project = "TCGA-BRCA",
+data.category = "Clinical",
+data.type = "Clinical Supplement",
+data.format = 'BCR Biotab')
+# GDCdownload(clin_query)  
+clinical.BCRtab.all <- GDCprepare(clin_query)
+clinic <- clinical.BCRtab.all$clinical_patient_brca[-c(1,2),]
+```
+```{r}
+#[Andrew Fletcher]
+head(clinic)
+```
+
+```{r}
+library(TCGAbiolinks)
+```
+```{r}
+#[Andrew Fletcher]
+head(clinic)
+```
+
+```{r}
+colnames(clinic)[ colnames(clinic) == "bcr_patient_barcode" ] <-
+"Tumor_Sample_Barcode"
+maf_query <- GDCquery(
+project = "TCGA-BRCA",
+data.category = "Simple Nucleotide Variation",
+access = "open",
+data.type = "Masked Somatic Mutation",
+workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+)
+#GDCdownload(maf_query, method = "api", files.per.chunk = 100)
+maf <- GDCprepare(maf_query)
+maf_object <- read.maf(maf = maf,
+clinicalData = clinic,
+isTCGA = TRUE)
+```
+
+```{r}
+maf <- GDCprepare(maf_query)
+maf_object <- read.maf(maf = maf,
+clinicalData = clinic,
+isTCGA = TRUE)
+```
+```{r}
+library(maftools)
+```
+
+```{r}
+#[Andrew Fletcher]
+head(maf)
+```
+
+```{r}
+rna_query <- GDCquery(project ="TCGA-BRCA",
+data.category = "Transcriptome Profiling",
+data.type = "Gene Expression Quantification",
+workflow.type = "STAR - Counts")
+GDCdownload(rna_query)
+rna_se <- GDCprepare(rna_query)
+```
+```{r}
+library(TCGAbiolinks)
+```
+
+```{r}
+#[Andrew Fletcher]
+head(rna_se)
+```
+```{r setup}
+    #TODO: fill in file path to analysis_data 
+    knitr::opts_knit$set(root.dir = normalizePath("/home1/aafletch/490_cluster/analysis_data")) 
+```
+
+```{r Exercise 1.1}
+data(mtcars)
+```
+
+```{r Exercise 1.2}
+head(mtcars) # just like in the terminal, you can use head to view the first few rows of a data frame
+```
+
+```{r Exercise 1.3}
+str(mtcars) # str stands for structure
+```
+
+```{r Exercise 1.4}
+mtcars$mpg
+
+```
+
+```{r Exercise 1.5}
+colnames(mtcars)
+rownames(mtcars)
+
+mtcars$carb
+```
+
+```{r Exercise 1.6}
+mtcars[2, 4] # access the value from the second row, fourth column (this is the horsepower of a Mazda RX4 Wag)
+
+mtcars[1,  ] # access all values in the first row (all info on the Mazda RX4)
+
+mtcars[ , 1] # access all values in the first column (mpg info for all cars)
+
+mtcars[1:5, c(1, 4, 6)] # rows one through five and columns 1, 4, and 6
+
+mtcars[-(3:30), ] # access everything EXCEPT rows 3 through 30
+
+mtcars[ , c(-(1:4), -6)] # access everything EXCEPT columns 1 through 4 and column 6
+
+mtcars["Duster 360" , "mpg"] # select the mpg (column) for only Duster 360 (row)
+
+```
+
+```{r Exercise 1.7}
+mtcars[c("Duster 360", "Lincoln Continental", "Maserati Bora"), "hp"]
+```
+
+
+```{r Exercise 1.8}
+data_frame$new_column <- values
+```
+
+
+```{r Exercise 1.9}
+mtcars$"transmission" <- ifelse(mtcars$am == 0, "automatic", "manual")
+
+```
+
+```{r Exercise 1.10}
+am<- which(colnames(mtcars) == "am")
+mtcars_copy <- mtcars[,-am ]
+```
+
+```{r Exercise 1.12}
+head(mtcars_copy)
+```
+
+
+```{r}
+library(TCGAbiolinks)
+clin_query <- GDCquery(project = "TCGA-BRCA",
+data.category = "Clinical",
+data.type = "Clinical Supplement",
+data.format = 'BCR Biotab')
+GDCdownload(clin_query)  
+clinical.BCRtab.all <- GDCprepare(clin_query)
+clinic <- clinical.BCRtab.all$clinical_patient_brca[-c(1,2),]
+colnames(clinic)[ colnames(clinic) == "bcr_patient_barcode" ] <- "Tumor_Sample_Barcode"
+
+
+
+```
+
+```{r}
+write.csv(clinic, "analysis_data/brca_clinical_data.csv", row.names=FALSE)
+```
+
+```{r}
+write.csv(clinic, "/home1/aafletch/490_cluster/analysis_data/brca_clinical_data.csv", row.names=FALSE)
+```
+
+
+```{r}
+clinic <- read.csv("/home1/aafletch/490_cluster/analysis_data/brca_clinical_data.csv")
+```
+# 1. 1097 rows by 112 columns
+# 2. string
+# 3. 50 years
+# 4. 45 years
+```{r}
+nrow(clinic)
+ncol(clinic)
+class(clinic$gender)
+```
+
+
+```{r Exercise 3.1}
+str(clinic)
+head(clinic)
+```
+
+
+```{r Exercise 3.2}
+colnames(clinic)
+rownames(clinic)
+
+```
+```{r Exercise 3.3}
+clinic$vital_status
+clinic[,"vital_status"]
+```
+
+```{r Exercise 4.1}
+clinic$lymph_nodes_examined <- as.numeric(clinic$lymph_nodes_examined_count)
+clinic$age_at_diagnosis <- as.numeric(clinic$age_at_diagnosis)
+
+plot(clinic$lymph_nodes_examined, clinic$age_at_diagnosis,
+main = "age at diagnosis vs lymph nodes examineed",
+xlab = "lumph nodes examined",
+ylab = "Age at diagnosis",
+col = "blue")
+```
+
+```{r}
+head(clinic)
+```
+
+```{r Exercise 4.2}
+
+age <- as.numeric(clinic$birth_days_to)/-365
+
+boxplot(age ~ tumor_status, data = clinic
+main = "Age vs tumor status",
+ylab = "age"
+xlab = )
+```
+
+2) Create a mask to select for male patients
+```{r}
+male_mask <- clinic$gender == "male"
+```
+
+```{r}
+age <- as.numeric(clinic$birth_days_to )/365
+under30_over60_mask <- age < 30 | age > 60
+```
+
+```{r}
+no_middle_clinic <- clinic[under30_over60_mask, ]
+```
+
+```{r}
+if (!require(survival)) {
+  install.packages("survival")
+}
+
+if (!require(survminer)) {
+  install.packages("survminer")
+}
+
+if (!require(ggplot2)) {
+  install.packages("ggplot2")
+}
+
+```
+
+
+```{r}
+library(survival)
+library(survminer)
+library(ggplot2)
+```
+
+```{r}
+age_NA_mask <- is.na(clinic$age_at_diagnosis)
+cleaned_clinic <- clinic[!age_NA_mask,]
+```
+    
+```{r}
+cleaned_clinic$age_category <- ifelse(cleaned_clinic$age_at_diagnosis <= 35, "Young",
+                               ifelse(cleaned_clinic$age_at_diagnosis < 50, "Middle", "Old"))
+                          
+```
+
+```{r}
+cleaned_clinic$survival_time <- ifelse(cleaned_clinic$death_days_to == "Not Applicable", cleaned_clinic$last_contact_days_to, cleaned_clinic$death_days_to)
+                      
+```
+
+```{r}
+cleaned_clinic$survival_time <- as.numeric(cleaned_clinic$survival_time)/365
+```
+
+```{r}
+cleaned_clinic$death_event <- cleaned_clinic$vital_status == "Dead"
+```
+
+Run the following code block.
+```{r}
+survival_object <- Surv(time = cleaned_clinic$survival_time,
+                        event = cleaned_clinic$death_event)
+
+fit_object <- survfit(survival_object ~ age_category, data = cleaned_clinic)
+```
+
+```{r}
+length(cleaned_clinic$survival_time)
+length(cleaned_clinic$death_event)
+nrow(cleaned_clinic)
+```
+
+```{r}
+survplot <- ggsurvplot(fit_object,
+                       pval=TRUE,
+                       ggtheme = theme(plot.margin = unit(c(1,1,1,1), "cm")),
+                       legend = 'right')
+
+KM_plot <- survplot$plot + theme_bw() + theme(axis.title = element_text(size=20), 
+                                              axis.text = element_text(size=16),
+                                              legend.title = element_text(size=14),
+                                              legend.text = element_text(size=12))
+
+KM_plot
+```
+# 1) Survival Probability
+# 2) time(years)
+# 3) young
+# 4) old
+# 5) 0%
+# 6) it is 0.77, which is higher than 0.05 making it statistically insignifigant
